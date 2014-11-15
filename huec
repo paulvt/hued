@@ -51,16 +51,10 @@ def status_line(blb)
   return line
 end
 
-def lights
-  Huey::Bulb.all.each do |blb|
-    puts status_line(blb)
-  end
-  true
 end
 
-def refresh
+def lights
   Huey::Bulb.all.each do |blb|
-    blb.reload
     puts status_line(blb)
   end
   true
@@ -69,6 +63,14 @@ end
 def groups
   Huey::Group.all.each do |grp|
     puts "#{grp.id}: #{grp.name} (#{grp.bulbs.map(&:id).join(', ')})"
+  end
+  true
+end
+
+def refresh!
+  Huey::Bulb.all.each do |blb|
+    blb.reload
+    puts status_line(blb)
   end
   true
 end
