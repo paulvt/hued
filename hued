@@ -76,14 +76,8 @@ class Hued
       @triggered
     end
 
-    # If this is a trigger rule, it should only be triggerd if it wasn't
-    # valid in a previous validity check
     def trigger?
-      if @trigger
-        !@triggered
-      else
-        @validity
-      end
+      @trigger
     end
 
     def execute
@@ -245,7 +239,7 @@ class Hued
   end
 
   def execute
-    @log.debug "Looking for valid rules..."
+    @log.debug "Looking for active (and valid) rules..."
     valid_rules = @rules.select(&:valid?)
     if valid_rules.empty?
       @log.debug "None found"
@@ -263,19 +257,24 @@ class Hued
       @log.debug "* Rule#{"s" unless prio_rules.count == 1} with prioity #{prio}: " +
                   prio_rules.map(&:name).join(", ")
     end
-    valid_rules_with_highest_prio = prio_map[prios.last]
-    if valid_rules != valid_rules_with_highest_prio
-      @log.debug "There #{valid_rules_with_highest_prio.count == 1 ? "is" : "are"} " \
-                 "only #{valid_rules_with_highest_prio.count} valid " \
-                 "rule#{"s" unless valid_rules_with_highest_prio.count == 1} " \
-                 "for the hightest priority #{prios.last}"
+    active_rules = prio_map[prios.last]
+    if valid_rules != active_rules
+      @log.debug "There #{active_rules.count == 1 ? "is" : "are"} " \
+                 "only #{active_rules.count} active " \
+                 "rule#{"s" unless active_rules.count == 1}"
+                 "(i.e. with priority #{prios.last})"
     end
-    valid_rules_with_highest_prio.each do |rule|
+    active_rules.each do |rule|
       if rule.trigger?
-        @log.info "Rule \"#{rule.name}\" is valid and should be triggered, executing..."
-        rule.execute
+        if rule.triggered?
+          @log.info "Rule \"#{rule.name}\" is active, but has already been triggered"
+        else
+          @log.info "Rule \"#{rule.name}\" is active and should be triggered"
+          rule.execute
+        end
       else
-        @log.debug "Rule \"#{rule.name}\" is valid, but should not be triggered (again)"
+        @log.info "Rule \"#{rule.name}\" is active and should be triggered (again)"
+        rule.execute
       end
     end
   end
