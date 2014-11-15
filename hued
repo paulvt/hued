@@ -124,19 +124,25 @@ class Hued
         return true if @conditions.empty?
 
         @conditions.map do |cond|
-          if cond.is_a? Hash
-            cond_name, cond_value = cond.to_a.first
-            case cond_name
-            when "from"
-              Time.now >= Chronic.parse(cond_value)
-            when "until"
-              Time.now <= Chronic.parse(cond_value)
-            when "found host"
-              system("ping -W3 -c1 -q #{cond_value} > /dev/null")
-            end
-          else
-            @log.warn "Unknown condition type/form #{cond.inspect}"
-          end
+          cond_negate = false
+          res = if cond.is_a? Hash
+                  cond_name, cond_value = cond.to_a.first
+                  if cond_name[0] == "^"
+                    cond_negate = true
+                    cond_name = cond_name[1..-1]
+                  end
+                  case cond_name
+                  when "from"
+                    Time.now >= Chronic.parse(cond_value)
+                  when "until"
+                    Time.now <= Chronic.parse(cond_value)
+                  when "found host"
+                    system("ping -W3 -c1 -q #{cond_value} > /dev/null")
+                  end
+                else
+                  @log.warn "Unknown condition type/form #{cond.inspect}"
+                end
+          cond_negate ? !res : res
         end.all?
       end
 
