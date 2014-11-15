@@ -363,12 +363,14 @@ rescue OptionParser::InvalidOption => e
   abort opt_parser.to_s
 end
 
+# Create the main engine
+hued = Hued.new(options)
+
 # Handle signals
 Signal.trap("INT") { EM.stop }
 Signal.trap("TERM") { EM.stop }
 
-# Create the main engine and trigger it periodically
-hued = Hued.new(options)
+# Trigger rule execution and light status refreshing periodically
 EM.run do
   EM.add_periodic_timer(10) { hued.reload; hued.execute }
   EM.add_periodic_timer(300) { hued.refresh! }
