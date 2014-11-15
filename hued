@@ -248,10 +248,10 @@ class Hued
     @log.debug "Looking for active (and valid) rules..."
     valid_rules = @rules.select(&:valid?)
     if valid_rules.empty?
-      @log.debug "None found"
+      @log.debug "No valid rules found"
       return
     else
-      @log.debug "There #{valid_rules.count == "1" ? "is" : "are"} " \
+      @log.debug "There #{valid_rules.count == 1 ? "is" : "are"} " \
                  "#{valid_rules.count} valid " \
                  "rule#{"s" unless valid_rules.count == 1}"
     end
