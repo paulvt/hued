@@ -51,6 +51,14 @@ def status_line(blb)
   return line
 end
 
+def prompt_status
+  Huey::Bulb.all.map do |blb|
+    if blb.reachable
+      blb.on ? Rainbow("o").bright.green : Rainbow("o").red
+    else
+      Rainbow("x").bright.red
+    end
+  end.join
 end
 
 def lights
@@ -148,4 +156,5 @@ def commands
 EOT
 end
 
+Pry.config.prompt = proc { "#{prompt_status}> " }
 binding.pry(quiet: true)
