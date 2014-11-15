@@ -111,7 +111,7 @@ def setgrp(*names_or_ids, opts)
 end
 
 def alert(*names_or_ids)
-  name_or_ideas.map do |name_or_id|
+  names_or_ids.map do |name_or_id|
     blb = Huey::Bulb.find(name_or_id)
     blb.alert!
   end
