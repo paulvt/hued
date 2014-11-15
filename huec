@@ -1,0 +1,119 @@
+#!/usr/bin/env ruby
+
+require "huey"
+require "logger"
+require "pp"
+require "pry"
+require "rainbow"
+
+bridge_cfg = File.open("bridge.yml") { |file| YAML.load(file) }
+Huey.configure do |cfg|
+  cfg.hue_ip = bridge_cfg["ip"]
+  cfg.uuid = bridge_cfg["user"]
+  cfg.logger = nil
+end
+Huey.logger.level = Logger::FATAL
+Huey::Bulb.all
+
+def status_line(blb)
+  mode = []
+  if blb.reachable
+    on_off = blb.on ? Rainbow("on").bright.green : Rainbow("off").red
+    case blb.colormode
+    when "xy"
+      mode << "xy: #{blb.xy.inspect}"
+    when "hs"
+      mode << "hue: #{blb.hue}" << "sat: #{blb.sat}"
+    when "ct"
+      mode << "ct: #{blb.ct}"
+    end
+    mode << "bri: #{blb.bri}"
+  else
+    on_off = Rainbow("unreachable").bright.red
+  end
+
+  line = "%2d: %-30s (%-12s" % [blb.id, blb.name, on_off, mode]
+  if mode.empty?
+    line += ")"
+  else
+    line += ", #{mode.join(', ')})"
+  end
+
+  return line
+end
+
+def lights
+  Huey::Bulb.all.each do |blb|
+    puts status_line(blb)
+  end
+  true
+end
+
+def refresh
+  Huey::Bulb.all.each do |blb|
+    blb.reload
+    puts status_line(blb)
+  end
+  true
+end
+
+def groups
+  Huey::Group.all.each do |grp|
+    puts "#{grp.id}: #{grp.name} (#{grp.bulbs.map(&:id).join(', ')})"
+  end
+  true
+end
+
+def get(*names_or_ids)
+  names_or_ids.map do |name_or_id|
+    blb = Huey::Bulb.find(name_or_id)
+    puts status_line(blb)
+    true
+  end
+end
+
+def set(*names_or_ids, opts)
+  blb = nil
+  names_or_ids.map do |name_or_id|
+    blb = Huey::Bulb.find(name_or_id)
+    blb.update(opts)
+  end
+rescue Huey::Errors::BulbOff
+  blb.update(on: true)
+  retry
+rescue Huey::Errors::Error => e
+  puts "Error: #{e.message}"
+end
+
+def getgrp(*names_or_ids)
+  names_or_ids.map do |name_or_id|
+    Huey::Group.find(name_or_id).each do |blb|
+      puts status_line(blb)
+    end
+    true
+  end
+end
+
+def setgrp(*names_or_ids, opts)
+  names_or_ids.map do |name_or_id|
+    grp = Huey::Group.find(name_or_id)
+    grp.update(opts)
+  end
+end
+
+def alert(*names_or_ids)
+  name_or_ideas.map do |name_or_id|
+    blb = Huey::Bulb.find(name_or_id)
+    blb.alert!
+  end
+end
+
+def off(*names_or_ids)
+  set(*names_or_ids, on: false)
+end
+
+def on(*names_or_ids)
+  set(*names_or_ids, on: true)
+end
+
+binding.pry
