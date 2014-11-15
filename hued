@@ -4,6 +4,7 @@ require "chronic"
 require "eventmachine"
 require "huey"
 require "logger"
+require "optparse"
 require "pp"
 
 # The main engine class
@@ -11,7 +12,10 @@ class Hued
 
   Scenes = {}
 
-  # A rule class
+  # Program version
+  VERSION = "0.0.1"
+
+  # The rule class
   class Rule
 
     attr_reader :name, :conditions, :tigger, :priority, :events, :scene
@@ -153,7 +157,7 @@ class Hued
     Huey.configure do |cfg|
       cfg.hue_ip = bridge_cfg["ip"]
       cfg.uuid = bridge_cfg["user"]
-      if @options[:debug_hue]
+      if @options[:hue_debug]
         cfg.logger = @log
       else
         # Use the default logger and make it shut up
@@ -168,7 +172,7 @@ class Hued
     @lights = Huey::Bulb.all
     @lights.each do |light|
       @log.info "* Found light #{light.id}: #{light.name}"
-      light.alert! unless @options[:blink]
+      light.alert! if @options[:blink]
     end
     @log.info "Found #{@lights.count} light#{"s" unless @lights.count == 1}"
 
@@ -260,10 +264,40 @@ class Hued
 end # class Hued
 
 # Option parsing
-options = {}
-options[:debug] = ARGV.delete("--debug")
-options[:debug_hue] = ARGV.delete("--debug-hue")
-options[:no_blink] = ARGV.delete("--no-blink")
+options = {blink: true}
+opt_parser = OptionParser.new do |opts|
+  opts.banner = "Usage: hued [options]"
+  opts.separator ""
+
+  opts.on("--[no-]blink", "blink lights when discovered on startup") do |bl|
+    options[:blink] = bl
+  end
+
+  opts.on("-d", "--debug", "log debug output") do
+    options[:debug] = true
+  end
+
+  opts.on("--hue-debug", "log hue bridge communication output") do
+    options[:hue_debug] = true
+  end
+
+  opts.on_tail("-h", "--help", "show this help message") do
+    puts opts
+    exit
+  end
+
+  opts.on_tail("-v", "--version", "show version") do
+    puts "Hued version #{Hued::VERSION}"
+    exit
+  end
+end
+
+begin
+  opt_parser.parse!
+rescue OptionParser::InvalidOption => e
+  warn e.message
+  abort opt_parser.to_s
+end
 
 # Create the main engine and trigger it periodically
 hued = Hued.new(options)
