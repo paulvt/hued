@@ -125,4 +125,25 @@ def on(*names_or_ids)
   set(*names_or_ids, on: true)
 end
 
-binding.pry
+def commands
+  puts <<EOT
+  Available commands:
+
+  lights                          shows the list of all lights
+                                    (ID, name and state)
+  get [name/ID]                   get the setting of a light
+  set [name/ID], [update]         update the setting of a light
+  alert [name/ID]                 show an alert/blink a light
+  on [name/ID]                    turn a light on
+  off [name/ID]                   turn a light off
+  refresh!                        refresh the setting of all lights
+
+  groups                          shows the list of all groups
+                                    (ID, name, IDs of member lights)
+  getgrp [name/ID]                get the settings of the lights in a group
+  setgrp [name/ID], [update]      set the settings of the lights in a group
+
+EOT
+end
+
+binding.pry(quiet: true)
