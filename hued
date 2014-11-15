@@ -273,6 +273,10 @@ class Hued
     end
   end
 
+  def shutdown
+    @log.info "Shutting down..."
+  end
+
 end # class Hued
 
 # Option parsing
@@ -311,9 +315,14 @@ rescue OptionParser::InvalidOption => e
   abort opt_parser.to_s
 end
 
+# Handle signals
+Signal.trap("INT") { EM.stop }
+Signal.trap("TERM") { EM.stop }
+
 # Create the main engine and trigger it periodically
 hued = Hued.new(options)
 EM.run do
   EM.add_periodic_timer(10) { hued.execute }
   EM.add_periodic_timer(300) { hued.refresh! }
 end
+hued.shutdown
