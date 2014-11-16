@@ -6,7 +6,7 @@ module Hued
   class Engine
 
     def initialize(options = {})
-      @options = Hued.config
+      @config = Hued.config
       @log = Hued.log
       @ctime = Hash.new(Time.now)
 
@@ -22,7 +22,7 @@ module Hued
       Huey.configure do |cfg|
         cfg.hue_ip = bridge_cfg["ip"]
         cfg.uuid = bridge_cfg["user"]
-        if @options[:hue_debug]
+        if @config[:hue_debug]
           cfg.logger = @log
         else
           # Use the default logger and make it shut up
@@ -37,7 +37,7 @@ module Hued
       @lights = Huey::Bulb.all
       @lights.each do |light|
         @log.info "* Found light #{light.id}: #{light.name}"
-        light.alert! if @options[:blink]
+        light.alert! if @config[:blink]
       end
       @log.info "Found #{@lights.count} light#{"s" unless @lights.count == 1}"
 
