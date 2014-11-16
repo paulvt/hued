@@ -48,7 +48,8 @@ module Hued
                   "lights #{group.bulbs.map(&:id).join(", ")}"
       end
       @log.info "Found #{@groups.count} group#{@groups.count != 1 || "s"}"
-    rescue
+    rescue => e
+      @log.error "Could not discover lights/groups: #{e.message}"
       @lights = []
       @groups = []
     end
@@ -153,7 +154,8 @@ module Hued
           @log.info "* Loaded event: #{event.name}"
         end
         @log.info "Loaded #{@events.count} event#{"s" unless @events.count == 1}"
-      rescue
+      rescue => e
+        @log.error "Could not load events: #{e.message}"
         @events= []
       end
 
@@ -172,7 +174,8 @@ module Hued
           @log.info "* Loaded scene: #{name}"
         end
         @log.info "Loaded #{@scenes.count} scene#{"s" unless @scenes.count == 1}"
-      rescue
+      rescue => e
+        @log.error "Could not load scenes: #{e.message}"
         @scenes = {}
       end
 
@@ -185,6 +188,9 @@ module Hued
           @log.info "* Loaded rule: #{rule.name}"
         end
         @log.info "Loaded #{@rules.count} rule#{"s" unless @rules.count == 1}"
+      rescue => e
+        @log.error "Could not load rules: #{e.message}"
+        @scenes = {}
       end
 
   end # class Hued::Engine
