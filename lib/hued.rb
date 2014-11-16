@@ -25,8 +25,14 @@ module Hued
   # FIXME: load scenes as Hued::Scene classes
   Scenes = {}
 
+  DefaultConfig = { blink: true,
+                    config_dir: "config",
+                    hue_debug: false,
+                    debug: false }
+
+
   def configure(options)
-    @config = options
+    @config = DefaultConfig.merge(options)
 
     # Set up the logger
     @log = Logger.new($stdout)

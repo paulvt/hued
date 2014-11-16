@@ -13,7 +13,7 @@
 require "hued"
 
 # Option parsing
-options = {blink: true}
+options = {}
 opt_parser = OptionParser.new do |opts|
   opts.banner = "Usage: hued [options]"
   opts.separator ""
