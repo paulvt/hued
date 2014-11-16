@@ -128,7 +128,8 @@ inactive.  By default this is a trigger, so at activation it will
 execute the scene "Nice office lighting" (see below).
 
 At 18:00 the "Office lighting during working hours" will become inactive
-again and the always-valid "All off" rule will take over and start 
+again and the always-valid "All off" rule will take over and start
+executing the "All off" event again.
 
 `events.yml`:
 
