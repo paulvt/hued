@@ -22,6 +22,10 @@ opt_parser = OptionParser.new do |opts|
     options[:blink] = bl
   end
 
+  opts.on("-c", "--config-dir [CONFDIR] ",
+          "set an alternative configuration directory") do |cd|
+    options[:config_dir] = cd
+  end
   opts.on("-d", "--debug", "log debug output") do
     options[:debug] = true
   end
