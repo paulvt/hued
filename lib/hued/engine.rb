@@ -23,10 +23,16 @@ module Hued
 
     def configure
       @log.info "Starting..."
-      bridge_cfg = YAML.load_file(@file[:bridge])
+      bridge_cfg = begin
+                     YAML.load_file(@file[:bridge])
+                   rescue => e
+                     @log.info "Cannot find bridge configuration: #{@file[:bridge]}!"
+                     @log.info "Will trying automatic setup when discovering"
+                     nil
+                   end
       Huey.configure do |cfg|
-        cfg.hue_ip = bridge_cfg["ip"]
-        cfg.uuid = bridge_cfg["user"]
+        cfg.hue_ip = bridge_cfg["ip"] if bridge_cfg
+        cfg.uuid = bridge_cfg["user"] if bridge_cfg
         if @config[:hue_debug]
           cfg.logger = @log
         else
@@ -53,6 +59,7 @@ module Hued
                   "lights #{group.bulbs.map(&:id).join(", ")}"
       end
       @log.info "Found #{@groups.count} group#{@groups.count != 1 || "s"}"
+      # FIXME: mention bridge.cfg contents if it was done via auto setup
     rescue => e
       @log.error "Could not discover lights/groups: #{e.message}"
       @lights = []
