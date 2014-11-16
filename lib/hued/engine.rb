@@ -8,7 +8,12 @@ module Hued
     def initialize(options = {})
       @config = Hued.config
       @log = Hued.log
-      @ctime = Hash.new(Time.now)
+      @ctime = {}
+      @file = {}
+      [:bridge, :events, :scenes, :rules].each do |items|
+        @ctime[items] = Time.now
+        @file[items] = File.join(@config[:config_dir], "#{items}.yml")
+      end
 
       configure
       discover
@@ -18,7 +23,7 @@ module Hued
 
     def configure
       @log.info "Starting..."
-      bridge_cfg = File.open("bridge.yml") { |file| YAML.load(file) }
+      bridge_cfg = YAML.load_file(@file[:bridge])
       Huey.configure do |cfg|
         cfg.hue_ip = bridge_cfg["ip"]
         cfg.uuid = bridge_cfg["user"]
@@ -62,18 +67,18 @@ module Hued
 
     def load
       [:events, :scenes].each do |items|
-        if File.exist? "#{items}.yml"
+        if File.exist? @file[items]
           @log.info "Loading #{items}..."
           send("load_#{items}")
         end
       end
 
       # Treat rules separately, we cannot start without it
-      if File.exist? "rules.yml"
+      if File.exist? @file[:rules]
         @log.info "Loading rules"
         load_rules
       else
-        @log.error "Cannot find required file: rules.yml, aborting!"
+        @log.error "Cannot find required file: #{@file[:rules]}, aborting!"
         exit 1
       end
     end
@@ -82,8 +87,8 @@ module Hued
       @log.debug "Checking if events/scenes/rules need to be reloaded..."
       @reload_rules = false
       [:events, :scenes].each do |items|
-        if File.exist?("#{items}.yml") and
-           File.ctime("#{items}.yml") > @ctime[items]
+        if File.exist?(@file[items]) and
+           File.ctime(@file[items]) > @ctime[items]
           @log.info "Reloading events..."
           send("load_#{items}")
           # Rules may depend on events/scenes, reload the rules too!
@@ -91,8 +96,8 @@ module Hued
         end
       end
 
-      if File.exist?("rules.yml") and
-         (@reload_rules or File.ctime("rules.yml") > @ctime[:rules])
+      if File.exist?(@file[:rules]) and
+         (@reload_rules or File.ctime(@file[:rules]) > @ctime[:rules])
         @log.info "Reloading rules..."
         send("load_rules")
       end
@@ -147,8 +152,8 @@ module Hued
     private
 
       def load_events
-        @ctime[:events] = File.ctime("events.yml")
-        @events = Huey::Event.import("events.yml")
+        @ctime[:events] = File.ctime(@file[:events])
+        @events = Huey::Event.import(@file[:events])
         @events.each do |event|
           event.actions["on"] = true if event.actions["on"].nil?
           @log.info "* Loaded event: #{event.name}"
@@ -160,9 +165,9 @@ module Hued
       end
 
       def load_scenes
-        @ctime[:scenes] = File.ctime "scenes.yml"
+        @ctime[:scenes] = File.ctime(@file[:scenes])
         @scenes = {}
-        YAML.load_file("scenes.yml").each do |name, entry|
+        YAML.load_file(@file[:scenes]).each do |name, entry|
           @scenes[name] = entry.map do |ev_options|
             # Keys should be symbols
             options = ev_options.inject({}) { |opts, (k, v)| opts[k.to_sym] = v; opts }
@@ -180,13 +185,13 @@ module Hued
       end
 
       def load_rules
-        @ctime[:rules] = File.ctime "rules.yml"
-        @rules = YAML.load_file("rules.yml").map do |name, entry|
-                   Rule.new(name, @log, entry)
-                 end
-        @rules.each do |rule|
-          @log.info "* Loaded rule: #{rule.name}"
-        end
+        @ctime[:rules] = File.ctime(@file[:rules])
+        @rules =
+          YAML.load_file(@file[:rules]).map do |name, entry|
+            rule = Rule.new(name, @log, entry)
+            @log.info "* Loaded rule: #{rule.name}"
+            rule
+          end
         @log.info "Loaded #{@rules.count} rule#{"s" unless @rules.count == 1}"
       rescue => e
         @log.error "Could not load rules: #{e.message}"
