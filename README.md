@@ -4,7 +4,7 @@ A daemon for controlling Philips (friends of) hue lights by applying rules
 based on conditions.  Rules can in turn trigger or ensure execution of
 certain events or scenes.
 
-Features
+## Features
 
 * Supports individual lights and groups known to the bridge
 * Multiple rules with multiple conditions and multiple events or
@@ -22,6 +22,7 @@ The following Ruby libraries are required:
 * Chronic (>= 0.10.0)
 * EventMachine (>= 1.0.0)
 * Huey (with Color) (>= 2.1.0)
+* Rainbow (>= 0.8.0)
 
 At the moment, hued requires a patched version of Huey that supports
 a single light or set of lights for an event.
@@ -62,6 +63,8 @@ If both are given, the scene takes precedence.
 If trigger is enabled, the events or the scene will only be executed when
 becoming valid and active.
 (Being valid but not active can happen when a higher priority rule is valid.)
+
+FIXME: say something about conditions
 
 ### Events
 
