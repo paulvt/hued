@@ -22,7 +22,7 @@ module Hued
     end
 
     def configure
-      @log.info "Starting..."
+      @log.info "Starting hued v#{Hued::VERSION}..."
       bridge_cfg = begin
                      YAML.load_file(@file[:bridge])
                    rescue => e
