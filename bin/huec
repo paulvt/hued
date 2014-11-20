@@ -17,15 +17,6 @@ require "pp"
 require "pry"
 require "rainbow"
 
-bridge_cfg = File.open("bridge.yml") { |file| YAML.load(file) }
-Huey.configure do |cfg|
-  cfg.hue_ip = bridge_cfg["ip"]
-  cfg.uuid = bridge_cfg["user"]
-  cfg.logger = nil
-end
-Huey.logger.level = Logger::FATAL
-Huey::Bulb.all
-
 def status_line(blb)
   mode = []
   if blb.reachable
@@ -183,5 +174,26 @@ opt_parser = OptionParser.new do |opts|
     exit
   end
 end
+
+puts "Starting huec #{Hued::VERSION}..."
+bridge_cfg = YAML.load_file(File.join(options[:config_dir], "bridge.yml"))
+Huey.configure do |cfg|
+  cfg.hue_ip = bridge_cfg["ip"]
+  cfg.uuid = bridge_cfg["user"]
+end
+Huey.logger.level = options[:hue_debug] ? Logger::DEBUG : Logger::FATAL
+puts "Configured bridge connection"
+
+puts "Discovering lights..."
+lights
+puts
+
+puts "Discovering groups..."
+groups
+puts
+
+puts "All done!"
+puts "Use 'commands' to see a list of additional commands to pry's."
+puts
 Pry.config.prompt = proc { "#{prompt_status}> " }
 binding.pry(quiet: true)
