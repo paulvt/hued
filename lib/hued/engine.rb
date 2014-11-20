@@ -139,16 +139,20 @@ module Hued
                    "(i.e. with priority #{prios.last})"
       end
       active_rules.each do |rule|
-        if rule.trigger?
-          if rule.triggered?
-            @log.info "Rule \"#{rule.name}\" is active, but has already been triggered"
+        begin
+          if rule.trigger?
+            if rule.triggered?
+              @log.info "Rule \"#{rule.name}\" is active, but has already been triggered"
+            else
+              @log.info "Rule \"#{rule.name}\" is active and should be triggered"
+              rule.execute
+            end
           else
-            @log.info "Rule \"#{rule.name}\" is active and should be triggered"
+            @log.info "Rule \"#{rule.name}\" is active and should be triggered (again)"
             rule.execute
           end
-        else
-          @log.info "Rule \"#{rule.name}\" is active and should be triggered (again)"
-          rule.execute
+        rescue => e
+          @log.error "Could not execute rule: #{e.message}"
         end
       end
     end
