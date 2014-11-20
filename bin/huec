@@ -137,8 +137,7 @@ end
 
 def commands
   puts <<EOT
-  Available commands:
-
+Lights
   lights                          shows the list of all lights
                                     (ID, name and state)
   get [name/ID]                   get the setting of a light
@@ -148,6 +147,7 @@ def commands
   off [name/ID]                   turn a light off
   refresh!                        refresh the setting of all lights
 
+Groups
   groups                          shows the list of all groups
                                     (ID, name, IDs of member lights)
   getgrp [name/ID]                get the settings of the lights in a group
