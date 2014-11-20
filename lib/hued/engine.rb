@@ -58,7 +58,7 @@ module Hued
         @log.info "* Found group #{group.id}: #{group.name} with " \
                   "lights #{group.bulbs.map(&:id).join(", ")}"
       end
-      @log.info "Found #{@groups.count} group#{@groups.count != 1 || "s"}"
+      @log.info "Found #{@groups.count} group#{"s" unless @groups.count == 1}"
       # FIXME: mention bridge.cfg contents if it was done via auto setup
     rescue => e
       @log.error "Could not discover lights/groups: #{e.message}"
