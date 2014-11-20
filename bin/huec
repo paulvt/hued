@@ -175,6 +175,13 @@ opt_parser = OptionParser.new do |opts|
   end
 end
 
+begin
+  opt_parser.parse!
+rescue OptionParser::InvalidOption => e
+  warn e.message
+  abort opt_parser.to_s
+end
+
 puts "Starting huec #{Hued::VERSION}..."
 bridge_cfg = YAML.load_file(File.join(options[:config_dir], "bridge.yml"))
 Huey.configure do |cfg|
