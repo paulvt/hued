@@ -9,8 +9,10 @@
 # Free Software Foundation; either version 2 of the License, or (at your
 # option) any later version.
 
+require "hued/version"
 require "huey"
 require "logger"
+require "optparse"
 require "pp"
 require "pry"
 require "rainbow"
@@ -156,5 +158,30 @@ Groups
 EOT
 end
 
+# Option parsing
+options = {:config_dir => "config"}
+opt_parser = OptionParser.new do |opts|
+  opts.banner = "Usage: huec [options]"
+  opts.separator ""
+
+  opts.on("-c", "--config-dir [CONFDIR] ",
+          "set an alternative configuration directory") do |cd|
+    options[:config_dir] = cd
+  end
+
+  opts.on("--hue-debug", "log hue bridge communication output") do
+    options[:hue_debug] = true
+  end
+
+  opts.on_tail("-h", "--help", "show this help message") do
+    puts opts
+    exit
+  end
+
+  opts.on_tail("-v", "--version", "show version") do
+    puts "Hued version #{Hued::VERSION}"
+    exit
+  end
+end
 Pry.config.prompt = proc { "#{prompt_status}> " }
 binding.pry(quiet: true)
