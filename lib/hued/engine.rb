@@ -70,6 +70,8 @@ module Hued
       @log.debug "Refreshing lights..."
       @lights.each { |light| light.reload }
       @log.debug "Refreshed #{@lights.count} light#{"s" unless @lights.count == 1}"
+    rescue => e
+      @log.error "Could not refresh lights: #{e.message}"
     end
 
     def load
