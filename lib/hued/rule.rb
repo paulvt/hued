@@ -114,6 +114,9 @@ module Hued
                     Time.now <= Chronic.parse(cond_value)
                   when "found host"
                     system("ping -W3 -c1 -q #{cond_value} > /dev/null 2>&1")
+                  when "weekday", "weekdays"
+                    weekdays = cond_value.split(/,\s*/).map(&:downcase)
+                    weekdays.include? Time.now.strftime("%a").downcase
                   end
                 else
                   @log.warn "Unknown condition type/form #{cond.inspect}"
