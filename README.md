@@ -6,10 +6,12 @@ certain events or scenes.
 
 ## Features
 
-* Supports individual lights and groups known to the bridge
-* Multiple rules with multiple conditions and multiple events or
-  a scene
-* Scenes for reusing a specific set of events
+* Controls individual lights, sets of lights and groups known to the bridge
+* Uses scenes for bundling a specific set of events
+* Supports multiple rules with multiple conditions for executing certain
+  events or activating a certain scene
+* Supports rule prioritization
+* Has an addiotional command-line tool for light manipulation
 
 ## Requirements
 
