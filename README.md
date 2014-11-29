@@ -111,7 +111,7 @@ An example setup:
       events:
         - All off
 
-    Office lighting during working ours:
+    Office lighting during working hours:
       conditions:
         from: today at 9:00
         until: today at 18:00
