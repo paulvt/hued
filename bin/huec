@@ -146,22 +146,30 @@ Groups
   getgrp [name/ID]                get the settings of the lights in a group
   setgrp [name/ID], [update]      set the settings of the lights in a group
 
+Events
+  events                          shows the list of all events
+  event [name/ID]                 execute an event
+
+Scenes
+  scenes                          shows the list of all scenes
+  scenes [name/ID]                activate an scene
+
 EOT
 end
 
 # Option parsing
-options = {:config_dir => "config"}
+@options = {:config_dir => "config"}
 opt_parser = OptionParser.new do |opts|
   opts.banner = "Usage: huec [options]"
   opts.separator ""
 
   opts.on("-c", "--config-dir [CONFDIR] ",
           "set an alternative configuration directory") do |cd|
-    options[:config_dir] = cd
+    @options[:config_dir] = cd
   end
 
   opts.on("--hue-debug", "log hue bridge communication output") do
-    options[:hue_debug] = true
+    @options[:hue_debug] = true
   end
 
   opts.on_tail("-h", "--help", "show this help message") do
@@ -183,12 +191,12 @@ rescue OptionParser::InvalidOption => e
 end
 
 puts "Starting huec #{Hued::VERSION}..."
-bridge_cfg = YAML.load_file(File.join(options[:config_dir], "bridge.yml"))
+bridge_cfg = YAML.load_file(File.join(@options[:config_dir], "bridge.yml"))
 Huey.configure do |cfg|
   cfg.hue_ip = bridge_cfg["ip"]
   cfg.uuid = bridge_cfg["user"]
 end
-Huey.logger.level = options[:hue_debug] ? Logger::DEBUG : Logger::FATAL
+Huey.logger.level = @options[:hue_debug] ? Logger::DEBUG : Logger::FATAL
 puts "Configured bridge connection"
 
 puts "Discovering lights..."
