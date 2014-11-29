@@ -68,6 +68,30 @@ def groups
   true
 end
 
+def events
+  events_cfg = File.join(@options[:config_dir], "events.yml")
+  Huey::Event.import(events_cfg).each_with_index do |ev, idx|
+    puts "#{idx + 1}: #{ev.name}"
+  end
+  true
+end
+
+def scenes
+  @scenes = {}
+  scenes_cfg = File.join(@options[:config_dir], "scenes.yml")
+  YAML.load_file(scenes_cfg).each_with_index do |(name, entry), idx|
+    puts "#{idx + 1}: #{name}"
+    @scenes[name] = entry.map do |ev_options|
+      # Keys should be symbols
+      options = ev_options.inject({}) { |opts, (k, v)| opts[k.to_sym] = v; opts }
+      event = Huey::Event.new(options)
+      event.actions["on"] = true if event.actions["on"].nil?
+      event
+    end
+  end
+  true
+end
+
 def refresh!
   Huey::Bulb.all.each do |blb|
     blb.reload
@@ -111,6 +135,26 @@ def setgrp(*names_or_ids, opts)
     grp = Huey::Group.find(name_or_id)
     grp.update(opts)
   end
+end
+
+def event(name_or_id)
+  ev = case name_or_id
+       when Fixnum
+          Huey::Event.all[name_or_id - 1]
+       when String
+         Huey::Event.find(name_or_id)
+       end
+  ev.execute
+end
+
+def scene(name_or_id)
+  sc = case name_or_id
+       when Fixnum
+         @scenes.values[name_or_id - 1]
+       when String
+         @scenes[name_or_id]
+       end
+  sc.map { |ev| ev.execute }
 end
 
 def alert(*names_or_ids)
@@ -205,6 +249,14 @@ puts
 
 puts "Discovering groups..."
 groups
+puts
+
+puts "Loading events..."
+events
+puts
+
+puts "Loading scenes..."
+scenes
 puts
 
 puts "All done!"
