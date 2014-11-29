@@ -119,31 +119,31 @@ An example setup:
       scene: Nice office lighting
 
 The rule "Off when closed" has no conditions, thus it is always valid.
-It is also not a trigger so when valid and active it will always excute
-the "All off" event (see below).
+It is also not a trigger so when valid and active it will keep excuting
+the event "All off" (see below) repeatedly.
 
 Between 9:00 and 18:00, the rule "Office lighting during working hours" is
-valid and it has a higher priority, so "Off when closed" will become
-inactive.  By default this is a trigger, so at activation it will
-execute the scene "Nice office lighting" (see below).
+valid and it has a higher priority, so the rule "Off when closed" will
+become inactive.  This is a trigger (by default), so at activation it will
+execute the scene "Nice office lighting" (see below) only once.
 
 At 18:00 the "Office lighting during working hours" will become inactive
-again and the always-valid "All off" rule will take over and start
-executing the "All off" event again.
+and the always-valid rule "All off" will become active and start
+executing the event "All off" repeatedly again during the night.
 
 `events.yml`:
 
-      All off:
-        lights: [1, 2, 3, 4]
-        actions:
-          "on": false
+    All off:
+      lights: [1, 2, 3, 4]
+      actions:
+        "on": false
 
 `scenes.yml`:
 
     Nice office lighting:
       - light: Hue light window
         actions: 
-        hue: 12345
+          hue: 12345
           sat: 200
           bri: 255
       - lights: LivingColor light
