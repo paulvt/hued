@@ -115,17 +115,19 @@ An example setup:
       conditions:
         from: today at 9:00
         until: today at 18:00
+        weekdays: mon,tue,wed,thu,fri
       priority: 1
       scene: Nice office lighting
 
 The rule "Off when closed" has no conditions, thus it is always valid.
-It is also not a trigger so when valid and active it will keep excuting
+Since it is not a trigger, when valid and active it will keep excuting
 the event "All off" (see below) repeatedly.
 
-Between 9:00 and 18:00, the rule "Office lighting during working hours" is
-valid and it has a higher priority, so the rule "Off when closed" will
-become inactive.  This is a trigger (by default), so at activation it will
-execute the scene "Nice office lighting" (see below) only once.
+Between 9:00 and 18:00 on weekdays, the rule "Office lighting during
+working hours" is valid and it has a higher priority, so the rule "Off when
+closed" will become inactive.  This is a trigger (by default), so at
+activation it will execute the scene "Nice office lighting" (see below)
+only once.
 
 At 18:00 the "Office lighting during working hours" will become inactive
 and the always-valid rule "All off" will become active and start
