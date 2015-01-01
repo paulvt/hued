@@ -33,6 +33,7 @@ The following Ruby libraries are required:
 * Chronic (>= 0.10.0)
 * EventMachine (>= 1.0.0)
 * Huey (with Color) (>= 2.1.0)
+* Nokogiri (>= 1.5.0)
 * Rainbow (>= 0.8.0)
 
 At the moment, hued requires a patched version of Huey that supports
