@@ -1,5 +1,8 @@
 # encoding: utf-8
 
+require "nokogiri"
+require "net/http"
+
 module Hued
 
   # The rule class
@@ -16,6 +19,8 @@ module Hued
       @triggered = false
       @priority = entry["priority"] || 0
       @events = []
+
+      @sun_data = nil
 
       if entry["events"]
         entry["events"].each do |ev_name|
@@ -117,6 +122,24 @@ module Hued
                   when "weekday", "weekdays"
                     weekdays = cond_value.split(/,\s*/).map(&:downcase)
                     weekdays.include? Time.now.strftime("%a").downcase
+                  when "dark_at"
+                    now = Time.now
+                    # Retrieve new sunrise/sunset data if cache is too old
+                    if @sun_data.nil? or
+                       @sun_data.at("/sun/date/day").text.to_i != now.day
+                      lat, lon = cond_value
+                      url = "http://www.earthtools.org/sun/%s/%s/%s/%s/99/0" %
+                            [lat, lon, now.day, now.month]
+                      @log.debug "Retreiving sunrise/sunset data from #{url}..."
+                      data = Net::HTTP.get(URI(url))
+                      @sun_data = Nokogiri::XML(data)
+                    end
+                    sunrise = Chronic.parse("today " +
+                                            @sun_data.at("/sun/morning/sunrise").text)
+                    sunset = Chronic.parse("today " +
+                                           @sun_data.at("/sun/evening/sunset").text)
+
+                    now < sunrise or now > sunset
                   end
                 else
                   @log.warn "Unknown condition type/form #{cond.inspect}"
