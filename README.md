@@ -13,6 +13,15 @@ certain events or scenes.
 * Supports rule prioritization
 * Has an addiotional command-line tool for light manipulation
 
+Support conditions:
+* Host (machine/phone/other IP-enabled device) online
+* Start time (per day or globally)
+* End time (per day or globally)
+* Specific weekdays
+* When it is dark (using sunset/sunrise time using EarthTools Websevices [1])
+
+[1]: http://www.earthtools.org/webservices.htm
+
 ## Requirements
 
 Hued is a pure Ruby application, so you need
