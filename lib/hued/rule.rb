@@ -117,6 +117,9 @@ module Hued
                     Time.now >= Chronic.parse(cond_value)
                   when "until"
                     Time.now <= Chronic.parse(cond_value)
+                  when "at"
+                    time = Chronic.parse(cond_value)
+                    time <= Time.now and Time.now < time + 60
                   when "found host"
                     system("ping -W3 -c1 -q #{cond_value} > /dev/null 2>&1")
                   when "weekday", "weekdays"
