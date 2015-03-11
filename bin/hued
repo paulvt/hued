@@ -67,6 +67,6 @@ $stdout.sync = true
 # Trigger rule execution and light status refreshing periodically
 EM.run do
   EM.add_periodic_timer(10) { engine.reload; engine.execute }
-  EM.add_periodic_timer(300) { engine.refresh! }
+  EM.add_periodic_timer(120) { engine.refresh! }
 end
 engine.shutdown
