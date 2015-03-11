@@ -61,6 +61,9 @@ engine = Hued::Engine.new
 Signal.trap("INT") { EM.stop }
 Signal.trap("TERM") { EM.stop }
 
+# Write sync to stdout
+$stdout.sync = true
+
 # Trigger rule execution and light status refreshing periodically
 EM.run do
   EM.add_periodic_timer(10) { engine.reload; engine.execute }
