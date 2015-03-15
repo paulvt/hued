@@ -17,6 +17,8 @@ require "pp"
 require "pry"
 require "rainbow"
 
+include Huey
+
 def status_line(blb)
   mode = []
   if blb.reachable
