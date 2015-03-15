@@ -65,7 +65,7 @@ end
 
 def groups
   Huey::Group.all.each do |grp|
-    puts "#{grp.id}: #{grp.name} (#{grp.bulbs.map(&:id).join(', ')})"
+    puts "%2d: %s (%s)" % [grp.id, grp.name, grp.bulbs.map(&:id).join(', ')]
   end
   true
 end
@@ -73,7 +73,7 @@ end
 def events
   events_cfg = File.join(@options[:config_dir], "events.yml")
   Huey::Event.import(events_cfg).each_with_index do |ev, idx|
-    puts "#{idx + 1}: #{ev.name}"
+    puts "%2d: %s" % [idx, ev.name]
   end
   true
 end
@@ -82,7 +82,7 @@ def scenes
   @scenes = {}
   scenes_cfg = File.join(@options[:config_dir], "scenes.yml")
   YAML.load_file(scenes_cfg).each_with_index do |(name, entry), idx|
-    puts "#{idx + 1}: #{name}"
+    puts "%2d: %s" % [idx, name]
     @scenes[name] = entry.map do |ev_options|
       # Keys should be symbols
       options = ev_options.inject({}) { |opts, (k, v)| opts[k.to_sym] = v; opts }
@@ -142,7 +142,7 @@ end
 def event(name_or_id)
   ev = case name_or_id
        when Fixnum
-          Huey::Event.all[name_or_id - 1]
+          Huey::Event.all[name_or_id]
        when String
          Huey::Event.find(name_or_id)
        end
@@ -152,7 +152,7 @@ end
 def scene(name_or_id)
   sc = case name_or_id
        when Fixnum
-         @scenes.values[name_or_id - 1]
+         @scenes.values[name_or_id]
        when String
          @scenes[name_or_id]
        end
