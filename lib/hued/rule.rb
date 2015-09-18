@@ -1,7 +1,9 @@
 # encoding: utf-8
 
-require "nokogiri"
+require "date"
+require "json"
 require "net/http"
+require "time"
 
 module Hued
 
@@ -128,21 +130,32 @@ module Hued
                   when "dark_at"
                     now = Time.now
                     # Retrieve new sunrise/sunset data if cache is too old
-                    if @sun_data.nil? or
-                       @sun_data.at("/sun/date/day").text.to_i != now.day
+                    if @sun_data.nil? or @sun_data[:day] != now.to_date
                       lat, lon = cond_value
-                      url = "http://www.earthtools.org/sun/%s/%s/%s/%s/99/0" %
-                            [lat, lon, now.day, now.month]
+                      url = "http://api.sunrise-sunset.org/json?lat=%s&lng=%s&formatted=0" %
+                            [lat, lon]
                       @log.debug "Retreiving sunrise/sunset data from #{url}..."
-                      data = Net::HTTP.get(URI(url))
-                      @sun_data = Nokogiri::XML(data)
+                      begin
+                        data = Net::HTTP.get(URI(url))
+                        json_data = JSON(data)
+                        sunrise = Time.parse(json_data["results"]["sunrise"])
+                        sunset = Time.parse(json_data["results"]["sunset"])
+                        @sun_data = { day: Date.today,
+                                      sunrise: sunrise,
+                                      sunset: sunset }
+                      rescue => e
+                        @log.warn "Could retrieve sunset data: #{e}, will retry"
+                        @sun_data = nil
+                      end
                     end
-                    sunrise = Chronic.parse("today " +
-                                            @sun_data.at("/sun/morning/sunrise").text)
-                    sunset = Chronic.parse("today " +
-                                           @sun_data.at("/sun/evening/sunset").text)
-
-                    now < sunrise or now > sunset
+                    # Include twilight
+                    if @sun_data
+                      sunrise = @sun_data[:sunrise]
+                      sunset = @sun_data[:sunset]
+                      now < (sunrise - 10*60) or now > (sunset + 10*60)
+                    else
+                      false
+                    end
                   end
                 else
                   @log.warn "Unknown condition type/form #{cond.inspect}"

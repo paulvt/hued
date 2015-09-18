@@ -18,9 +18,9 @@ Support conditions:
 * Start time (per day or globally)
 * End time (per day or globally)
 * Specific weekdays
-* When it is dark (using sunset/sunrise time using EarthTools Websevices [1])
+* When it is dark (using sunset/sunrise time using the Sunrise-Sunset API [1])
 
-[1]: http://www.earthtools.org/webservices.htm
+[1]: http://sunrise-sunset.org/api
 
 ## Requirements
 
