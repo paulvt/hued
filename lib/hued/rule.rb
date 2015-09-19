@@ -22,7 +22,7 @@ module Hued
       @priority = entry["priority"] || 0
       @events = []
 
-      @sun_data = nil
+      @@sun_data = nil
 
       if entry["events"]
         entry["events"].each do |ev_name|
@@ -128,9 +128,8 @@ module Hued
                     weekdays = cond_value.split(/,\s*/).map(&:downcase)
                     weekdays.include? Time.now.strftime("%a").downcase
                   when "dark_at"
-                    now = Time.now
                     # Retrieve new sunrise/sunset data if cache is too old
-                    if @sun_data.nil? or @sun_data[:day] != now.to_date
+                    if @@sun_data.nil? or @@sun_data[:day] != Date.today
                       lat, lon = cond_value
                       url = "http://api.sunrise-sunset.org/json?lat=%s&lng=%s&formatted=0" %
                             [lat, lon]
@@ -140,19 +139,19 @@ module Hued
                         json_data = JSON(data)
                         sunrise = Time.parse(json_data["results"]["sunrise"])
                         sunset = Time.parse(json_data["results"]["sunset"])
-                        @sun_data = { day: Date.today,
-                                      sunrise: sunrise,
-                                      sunset: sunset }
+                        @@sun_data = { day: Date.today,
+                                       sunrise: sunrise,
+                                       sunset: sunset }
                       rescue => e
                         @log.warn "Could retrieve sunset data: #{e}, will retry"
-                        @sun_data = nil
+                        @@sun_data = nil
                       end
                     end
                     # Include twilight
-                    if @sun_data
-                      sunrise = @sun_data[:sunrise]
-                      sunset = @sun_data[:sunset]
-                      now < (sunrise - 10*60) or now > (sunset + 10*60)
+                    if @@sun_data
+                      sunrise = @@sun_data[:sunrise]
+                      sunset = @@sun_data[:sunset]
+                      !Time.now.between?(sunrise - 10*60, sunset + 10*60)
                     else
                       false
                     end
