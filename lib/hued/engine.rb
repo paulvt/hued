@@ -208,7 +208,7 @@ module Hued
         @log.info "Loaded #{@rules.count} rule#{"s" unless @rules.count == 1}"
       rescue => e
         @log.error "Could not load rules: #{e.message}"
-        @scenes = {}
+        @rules = {}
       end
 
   end # class Hued::Engine
