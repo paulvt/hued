@@ -131,9 +131,10 @@ module Hued
                     # Retrieve new sunrise/sunset data if cache is too old
                     if @@sun_data.nil? or @@sun_data[:day] != Date.today
                       lat, lon = cond_value
-                      url = "http://api.sunrise-sunset.org/json?lat=%s&lng=%s&formatted=0" %
-                            [lat, lon]
-                      @log.debug "Retreiving sunrise/sunset data from #{url}..."
+                      today = Date.today.strftime("%Y-%m-%d")
+                      url = "http://api.sunrise-sunset.org/json?lat=%s&lng=%s&date=%s&formatted=0" %
+                            [lat, lon, today]
+                      @log.debug "Retreiving sunrise/sunset data from #{url} for #{today}..."
                       begin
                         data = Net::HTTP.get(URI(url))
                         json_data = JSON(data)
