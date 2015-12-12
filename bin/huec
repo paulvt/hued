@@ -47,13 +47,17 @@ def status_line(blb)
 end
 
 def prompt_status
-  Huey::Bulb.all.map do |blb|
+  reload_needed = Time.now - @prompt_stamp > 10
+  prompt_str = Huey::Bulb.all.map do |blb|
+    blb.reload if reload_needed
     if blb.reachable
       blb.on ? Rainbow("o").bright.green : Rainbow("o").red
     else
       Rainbow("x").bright.red
     end
   end.join
+  @prompt_stamp = Time.now if reload_needed
+  prompt_str
 end
 
 def lights
@@ -264,5 +268,6 @@ puts
 puts "All done!"
 puts "Use 'commands' to see a list of additional commands to pry's."
 puts
+@prompt_stamp = Time.now
 Pry.config.prompt = proc { "#{prompt_status}> " }
 binding.pry(quiet: true)
